@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PresetsState {
 
- List<ColorPreset> get saved;
+ List<ColorPreset> get saved; List<ColorPreset> get builtIns;
 /// Create a copy of PresetsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $PresetsStateCopyWith<PresetsState> get copyWith => _$PresetsStateCopyWithImpl<P
 @override
 bool operator ==(Object other) {
   final _this = this as PresetsState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PresetsState&&const DeepCollectionEquality().equals(other.saved, _this.saved));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PresetsState&&const DeepCollectionEquality().equals(other.saved, _this.saved)&&const DeepCollectionEquality().equals(other.builtIns, _this.builtIns));
 }
 
 
 @override
 int get hashCode {
   final _this = this as PresetsState;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.saved));
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.saved),const DeepCollectionEquality().hash(_this.builtIns));
 }
 
 @override
 String toString() {
   final _this = this as PresetsState;
-  return 'PresetsState(saved: ${_this.saved})';
+  return 'PresetsState(saved: ${_this.saved}, builtIns: ${_this.builtIns})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $PresetsStateCopyWith<$Res>  {
   factory $PresetsStateCopyWith(PresetsState value, $Res Function(PresetsState) _then) = _$PresetsStateCopyWithImpl;
 @useResult
 $Res call({
- List<ColorPreset> saved
+ List<ColorPreset> saved, List<ColorPreset> builtIns
 });
 
 
@@ -68,9 +68,10 @@ class _$PresetsStateCopyWithImpl<$Res>
 
 /// Create a copy of PresetsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? saved = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? saved = null,Object? builtIns = null,}) {
   return _then(PresetsState(
 saved: null == saved ? _self.saved : saved // ignore: cast_nullable_to_non_nullable
+as List<ColorPreset>,builtIns: null == builtIns ? _self.builtIns : builtIns // ignore: cast_nullable_to_non_nullable
 as List<ColorPreset>,
   ));
 }
@@ -156,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<ColorPreset> saved)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<ColorPreset> saved,  List<ColorPreset> builtIns)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PresetsState() when $default != null:
-return $default(_that.saved);case _:
+return $default(_that.saved,_that.builtIns);case _:
   return orElse();
 
 }
@@ -177,10 +178,10 @@ return $default(_that.saved);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<ColorPreset> saved)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<ColorPreset> saved,  List<ColorPreset> builtIns)  $default,) {final _that = this;
 switch (_that) {
 case _PresetsState():
-return $default(_that.saved);case _:
+return $default(_that.saved,_that.builtIns);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +198,10 @@ return $default(_that.saved);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<ColorPreset> saved)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<ColorPreset> saved,  List<ColorPreset> builtIns)?  $default,) {final _that = this;
 switch (_that) {
 case _PresetsState() when $default != null:
-return $default(_that.saved);case _:
+return $default(_that.saved,_that.builtIns);case _:
   return null;
 
 }
@@ -212,7 +213,7 @@ return $default(_that.saved);case _:
 
 
 class _PresetsState extends PresetsState {
-  const _PresetsState({ List<ColorPreset> saved = const []}): _saved = saved,super._();
+  const _PresetsState({ List<ColorPreset> saved = const [],  List<ColorPreset> builtIns = builtInPresets}): _saved = saved,_builtIns = builtIns,super._();
   
 
  final  List<ColorPreset> _saved;
@@ -220,6 +221,13 @@ class _PresetsState extends PresetsState {
   if (_saved is EqualUnmodifiableListView) return _saved;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_saved);
+}
+
+ final  List<ColorPreset> _builtIns;
+@override@JsonKey() List<ColorPreset> get builtIns {
+  if (_builtIns is EqualUnmodifiableListView) return _builtIns;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_builtIns);
 }
 
 
@@ -233,18 +241,18 @@ _$PresetsStateCopyWith<_PresetsState> get copyWith => __$PresetsStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PresetsState&&const DeepCollectionEquality().equals(other.saved, _saved));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PresetsState&&const DeepCollectionEquality().equals(other.saved, _saved)&&const DeepCollectionEquality().equals(other.builtIns, _builtIns));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_saved));
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_saved),const DeepCollectionEquality().hash(_builtIns));
 }
 
 @override
 String toString() {
-    return 'PresetsState(saved: $saved)';
+    return 'PresetsState(saved: $saved, builtIns: $builtIns)';
 }
 
 
@@ -255,7 +263,7 @@ abstract mixin class _$PresetsStateCopyWith<$Res> implements $PresetsStateCopyWi
   factory _$PresetsStateCopyWith(_PresetsState value, $Res Function(_PresetsState) _then) = __$PresetsStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<ColorPreset> saved
+ List<ColorPreset> saved, List<ColorPreset> builtIns
 });
 
 
@@ -272,9 +280,10 @@ class __$PresetsStateCopyWithImpl<$Res>
 
 /// Create a copy of PresetsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? saved = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? saved = null,Object? builtIns = null,}) {
   return _then(_PresetsState(
 saved: null == saved ? _self._saved : saved // ignore: cast_nullable_to_non_nullable
+as List<ColorPreset>,builtIns: null == builtIns ? _self._builtIns : builtIns // ignore: cast_nullable_to_non_nullable
 as List<ColorPreset>,
   ));
 }

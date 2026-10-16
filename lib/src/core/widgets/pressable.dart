@@ -5,9 +5,17 @@ import '../theme/theme.dart';
 
 /// Shrinks a little under the finger and springs back, with a light haptic.
 class Pressable extends StatefulWidget {
-  const Pressable({super.key, required this.onTap, required this.child, this.scale = 0.96, this.haptic = true});
+  const Pressable({
+    super.key,
+    required this.onTap,
+    required this.child,
+    this.onLongPress,
+    this.scale = 0.96,
+    this.haptic = true,
+  });
 
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final Widget child;
   final double scale;
   final bool haptic;
@@ -31,6 +39,13 @@ class _PressableState extends State<Pressable> {
       onTapDown: enabled ? (_) => _set(true) : null,
       onTapUp: enabled ? (_) => _set(false) : null,
       onTapCancel: () => _set(false),
+      onLongPress: widget.onLongPress == null
+          ? null
+          : () {
+              _set(false);
+              HapticFeedback.mediumImpact();
+              widget.onLongPress!();
+            },
       onTap: enabled
           ? () {
               if (widget.haptic) HapticFeedback.selectionClick();

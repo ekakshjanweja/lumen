@@ -8,14 +8,14 @@ part of 'presets_view_model.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// The user's saved colours: listing, saving and deleting them.
+/// Colour presets: listing, saving and deleting them.
 
 @ProviderFor(PresetsViewModel)
 final presetsViewModelProvider = PresetsViewModelProvider._();
 
-/// The user's saved colours: listing, saving and deleting them.
+/// Colour presets: listing, saving and deleting them.
 final class PresetsViewModelProvider extends $NotifierProvider<PresetsViewModel, PresetsState> {
-  /// The user's saved colours: listing, saving and deleting them.
+  /// Colour presets: listing, saving and deleting them.
   PresetsViewModelProvider._()
     : super(
         from: null,
@@ -40,9 +40,9 @@ final class PresetsViewModelProvider extends $NotifierProvider<PresetsViewModel,
   }
 }
 
-String _$presetsViewModelHash() => r'baabe4bcacdf91dd06c8363b47fa16b0d052b69a';
+String _$presetsViewModelHash() => r'6a4d9b3b381bb66c13764b3abcc75c176876caad';
 
-/// The user's saved colours: listing, saving and deleting them.
+/// Colour presets: listing, saving and deleting them.
 
 abstract class _$PresetsViewModel extends $Notifier<PresetsState> {
   PresetsState build();

@@ -6,11 +6,19 @@ import '../../../core/widgets/pressable.dart';
 
 /// A round colour chip with a ring when selected.
 class PresetSwatch extends StatelessWidget {
-  const PresetSwatch({super.key, required this.preset, required this.selected, required this.onTap, this.size = 36});
+  const PresetSwatch({
+    super.key,
+    required this.preset,
+    required this.selected,
+    required this.onTap,
+    this.onLongPress,
+    this.size = 36,
+  });
 
   final ColorPreset preset;
   final bool selected;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final double size;
 
   @override
@@ -22,6 +30,7 @@ class PresetSwatch extends StatelessWidget {
       label: preset.name,
       child: Pressable(
         onTap: onTap,
+        onLongPress: onLongPress,
         scale: 0.85,
         child: AnimatedContainer(
           duration: Motion.medium,

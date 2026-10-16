@@ -30,7 +30,8 @@ class ColorPanel extends ConsumerWidget {
           presets: presets,
           isSelected: (p) => p.hue == hue && p.saturation == saturation,
           onPick: (p) => vm.setColor(p.hue, p.saturation),
-          onOpen: ({bool save = false}) => PresetsSheet.show(context, startSaving: save),
+          onOpen: ({bool save = false, bool edit = false}) =>
+              PresetsSheet.show(context, startSaving: save, startEditing: edit),
         ),
       ],
     );
@@ -44,7 +45,7 @@ class _QuickPresets extends StatelessWidget {
   final List<ColorPreset> presets;
   final bool Function(ColorPreset) isSelected;
   final ValueChanged<ColorPreset> onPick;
-  final void Function({bool save}) onOpen;
+  final void Function({bool save, bool edit}) onOpen;
 
   static const _swatch = 36.0;
   static const _gap = 8.0;
@@ -95,7 +96,14 @@ class _QuickPresets extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     for (final p in presets.take(fit))
-                      PresetSwatch(preset: p, size: _swatch, selected: isSelected(p), onTap: () => onPick(p)),
+                      PresetSwatch(
+                        preset: p,
+                        size: _swatch,
+                        selected: isSelected(p),
+                        onTap: () => onPick(p),
+                        // Long-press to manage presets, like the iOS home screen.
+                        onLongPress: () => onOpen(edit: true),
+                      ),
                   ],
                 );
               },

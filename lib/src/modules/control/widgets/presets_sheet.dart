@@ -10,19 +10,24 @@ import '../view_models/control_view_model.dart';
 import '../view_models/presets_view_model.dart';
 import 'preset_swatch.dart';
 
-/// All colour presets: pick one, save the current colour, or delete saved ones.
+/// All colour presets: pick one, save the current colour, or delete any of
+/// them. Long-press a preset (or tap Edit) to start deleting.
 class PresetsSheet extends ConsumerStatefulWidget {
-  const PresetsSheet({super.key, this.startSaving = false});
+  const PresetsSheet({super.key, this.startSaving = false, this.startEditing = false});
 
   /// Opens with the name field ready, for the quick save button.
   final bool startSaving;
 
-  static Future<void> show(BuildContext context, {bool startSaving = false}) => showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    builder: (context) => PresetsSheet(startSaving: startSaving),
-  );
+  /// Opens ready to delete, after a long-press in the quick row.
+  final bool startEditing;
+
+  static Future<void> show(BuildContext context, {bool startSaving = false, bool startEditing = false}) =>
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        builder: (context) => PresetsSheet(startSaving: startSaving, startEditing: startEditing),
+      );
 
   @override
   ConsumerState<PresetsSheet> createState() => _PresetsSheetState();
@@ -30,7 +35,7 @@ class PresetsSheet extends ConsumerStatefulWidget {
 
 class _PresetsSheetState extends ConsumerState<PresetsSheet> {
   late bool _saving = widget.startSaving;
-  bool _editing = false;
+  late bool _editing = widget.startEditing && !widget.startSaving;
   final _name = TextEditingController();
 
   @override
@@ -63,6 +68,19 @@ class _PresetsSheetState extends ConsumerState<PresetsSheet> {
     if (mounted) setState(() => _saving = false);
   }
 
+  void _startEditing() {
+    if (_editing) return;
+    setState(() {
+      _editing = true;
+      _saving = false;
+    });
+  }
+
+  void _delete(ColorPreset p) {
+    HapticFeedback.mediumImpact();
+    ref.read(presetsViewModelProvider.notifier).delete(p);
+  }
+
   void _pick(ColorPreset p) {
     ref.read(controlViewModelProvider.notifier).setColor(p.hue, p.saturation);
     Navigator.pop(context);
@@ -70,11 +88,14 @@ class _PresetsSheetState extends ConsumerState<PresetsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final saved = ref.watch(presetsViewModelProvider.select((s) => s.saved));
+    final presets = ref.watch(presetsViewModelProvider);
+    final saved = presets.saved;
+    final builtIns = presets.builtIns;
     final (hue, saturation) = ref.watch(controlViewModelProvider.select((s) => (s.light.hue, s.light.saturation)));
     final text = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
-    final editing = _editing && saved.isNotEmpty;
+    final hasAny = saved.isNotEmpty || builtIns.isNotEmpty;
+    final editing = _editing && hasAny;
     bool selected(ColorPreset p) => p.hue == hue && p.saturation == saturation;
 
     return Padding(
@@ -92,7 +113,7 @@ class _PresetsSheetState extends ConsumerState<PresetsSheet> {
                   Expanded(
                     child: Text('Color presets', style: text.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
                   ),
-                  if (saved.isNotEmpty)
+                  if (hasAny)
                     TextButton(
                       style: TextButton.styleFrom(minimumSize: const Size(64, 40)),
                       onPressed: () => setState(() => _editing = !editing),
@@ -137,14 +158,33 @@ class _PresetsSheetState extends ConsumerState<PresetsSheet> {
                       selected: selected,
                       editing: editing,
                       onTap: _pick,
-                      onDelete: (p) {
-                        HapticFeedback.mediumImpact();
-                        ref.read(presetsViewModelProvider.notifier).delete(p.id);
-                      },
+                      onDelete: _delete,
+                      onLongPress: _startEditing,
                     ),
                   const SizedBox(height: 18),
                   _SectionTitle('Built-in'),
-                  _PresetGrid(presets: builtInPresets, selected: selected, editing: false, onTap: _pick),
+                  if (builtIns.isNotEmpty)
+                    _PresetGrid(
+                      presets: builtIns,
+                      selected: selected,
+                      editing: editing,
+                      onTap: _pick,
+                      onDelete: _delete,
+                      onLongPress: _startEditing,
+                    ),
+                  if (presets.canRestore)
+                    Padding(
+                      padding: EdgeInsets.only(top: builtIns.isEmpty ? 0 : 12),
+                      child: TextButton.icon(
+                        style: TextButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                        onPressed: () {
+                          HapticFeedback.selectionClick();
+                          ref.read(presetsViewModelProvider.notifier).restoreBuiltIns();
+                        },
+                        icon: const Icon(Icons.restore_rounded, size: 20),
+                        label: const Text('Restore built-in colors'),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -284,38 +324,47 @@ class _PresetGrid extends StatelessWidget {
     required this.selected,
     required this.editing,
     required this.onTap,
-    this.onDelete,
+    required this.onDelete,
+    required this.onLongPress,
   });
 
   final List<ColorPreset> presets;
   final bool Function(ColorPreset) selected;
   final bool editing;
   final ValueChanged<ColorPreset> onTap;
-  final ValueChanged<ColorPreset>? onDelete;
+  final ValueChanged<ColorPreset> onDelete;
+  final VoidCallback onLongPress;
 
   @override
   Widget build(BuildContext context) {
     final reduced = Motion.reduced(context);
-    return GridView.count(
-      crossAxisCount: 4,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
-      mainAxisSpacing: 14,
-      crossAxisSpacing: 8,
-      childAspectRatio: 0.82,
-      children: [
-        for (final (i, p) in presets.indexed)
-          KeyedSubtree(
-            key: ValueKey(p.id),
-            child: _PresetTile(
-              preset: p,
-              selected: selected(p),
-              editing: editing,
-              onTap: () => editing ? onDelete?.call(p) : onTap(p),
-            ),
-          ).animateIf(!reduced, i),
-      ],
+    // Eases the height when a row empties after a delete.
+    return AnimatedSize(
+      duration: Motion.medium,
+      curve: Motion.emphasized,
+      alignment: Alignment.topCenter,
+      child: GridView.count(
+        crossAxisCount: 4,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        mainAxisSpacing: 14,
+        crossAxisSpacing: 8,
+        childAspectRatio: 0.82,
+        children: [
+          for (final (i, p) in presets.indexed)
+            KeyedSubtree(
+              key: ValueKey(p.id),
+              child: _PresetTile(
+                preset: p,
+                selected: selected(p),
+                editing: editing,
+                onTap: () => editing ? onDelete(p) : onTap(p),
+                onLongPress: onLongPress,
+              ),
+            ).animateIf(!reduced, i),
+        ],
+      ),
     );
   }
 }
@@ -329,12 +378,19 @@ extension on Widget {
 }
 
 class _PresetTile extends StatelessWidget {
-  const _PresetTile({required this.preset, required this.selected, required this.editing, required this.onTap});
+  const _PresetTile({
+    required this.preset,
+    required this.selected,
+    required this.editing,
+    required this.onTap,
+    required this.onLongPress,
+  });
 
   final ColorPreset preset;
   final bool selected;
   final bool editing;
   final VoidCallback onTap;
+  final VoidCallback onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -343,7 +399,13 @@ class _PresetTile extends StatelessWidget {
     Widget swatch = Stack(
       clipBehavior: Clip.none,
       children: [
-        PresetSwatch(preset: preset, size: 56, selected: selected && !editing, onTap: onTap),
+        PresetSwatch(
+          preset: preset,
+          size: 56,
+          selected: selected && !editing,
+          onTap: onTap,
+          onLongPress: editing ? null : onLongPress,
+        ),
         Positioned(
           top: -4,
           right: -4,
@@ -356,11 +418,11 @@ class _PresetTile extends StatelessWidget {
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: scheme.error,
+                  color: const Color(0xFFFF453A),
                   shape: BoxShape.circle,
                   border: Border.all(color: scheme.surfaceContainerHigh, width: 2),
                 ),
-                child: Icon(Icons.close_rounded, size: 14, color: scheme.onError),
+                child: const Icon(Icons.close_rounded, size: 14, color: Colors.white),
               ),
             ),
           ),
