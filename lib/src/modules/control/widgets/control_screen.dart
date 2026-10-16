@@ -24,42 +24,15 @@ class ControlScreen extends ConsumerWidget {
     final state = ref.watch(controlViewModelProvider);
     final vm = ref.read(controlViewModelProvider.notifier);
     final s = state.light;
-    final text = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
     final reduced = Motion.reduced(context);
 
-    final sections = <Widget>[
-      _Header(state: state, onSearch: () => _confirmSearch(context, vm)),
-      const SizedBox(height: 12),
-      Center(
-        child: LightOrb(light: s, onToggle: vm.togglePower),
-      ),
-      const SizedBox(height: 4),
-      _Readout(light: s),
-      const SizedBox(height: 28),
-      TrackSlider(
-        label: 'Brightness',
-        icon: Icons.brightness_6_rounded,
-        format: (v) => '${v.round()}%',
-        value: s.brightness.toDouble(),
-        min: 1,
-        max: 100,
-        fillColor: s.on ? Color.lerp(s.previewColor, Colors.white, 0.12) : scheme.surfaceContainerHighest,
-        onChanged: (v) => vm.setBrightness(v.round()),
-      ),
-      const SizedBox(height: 14),
-      ModeSwitcher(value: s.mode, onChanged: vm.setMode, tint: s.on ? s.previewColor : scheme.outline),
-      const SizedBox(height: 26),
-      _ModePanel(mode: s.mode),
-      if (state.status == LinkStatus.reconnecting) ...[
-        const SizedBox(height: 20),
-        Text(
-          'Lost connection. Reconnecting…',
-          textAlign: TextAlign.center,
-          style: text.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
-        ),
-      ],
-    ];
+    Widget enter(Widget child, int i) => reduced
+        ? child
+        : child
+              .animate(delay: (45 * i).ms)
+              .fadeIn(duration: Motion.slow, curve: Motion.emphasized)
+              .moveY(begin: 18, end: 0, duration: Motion.slow, curve: Motion.emphasized);
 
     return Scaffold(
       body: AmbientBackground(
@@ -67,14 +40,53 @@ class ControlScreen extends ConsumerWidget {
         level: s.on ? 0.35 + 0.65 * s.brightness / 100 : 0,
         child: SafeArea(
           bottom: false,
-          child: ListView(
-            padding: EdgeInsets.fromLTRB(20, 8, 20, 40 + MediaQuery.paddingOf(context).bottom),
-            children: reduced
-                ? sections
-                : sections
-                      .animate(interval: 45.ms)
-                      .fadeIn(duration: Motion.slow, curve: Motion.emphasized)
-                      .moveY(begin: 18, end: 0, duration: Motion.slow, curve: Motion.emphasized),
+          // No page scroll: the controls stay put and the mode panel gets the
+          // rest of the screen. The orb gives up some size on short screens.
+          child: LayoutBuilder(
+            builder: (context, c) {
+              // Header, readout, slider, mode tabs and gaps take about 284pt;
+              // the panel gets ~330pt first, and the orb takes what's left.
+              final orb = (c.maxHeight - 284 - 330).clamp(110.0, 236.0);
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    enter(_Header(state: state, onSearch: () => _confirmSearch(context, vm)), 0),
+                    enter(
+                      Center(
+                        child: LightOrb(light: s, onToggle: vm.togglePower, size: orb),
+                      ),
+                      1,
+                    ),
+                    enter(_Readout(light: s), 2),
+                    const SizedBox(height: 20),
+                    enter(
+                      TrackSlider(
+                        label: 'Brightness',
+                        icon: Icons.brightness_6_rounded,
+                        format: (v) => '${v.round()}%',
+                        value: s.brightness.toDouble(),
+                        min: 1,
+                        max: 100,
+                        fillColor: s.on
+                            ? Color.lerp(s.previewColor, Colors.white, 0.12)
+                            : scheme.surfaceContainerHighest,
+                        onChanged: (v) => vm.setBrightness(v.round()),
+                      ),
+                      3,
+                    ),
+                    const SizedBox(height: 12),
+                    enter(
+                      ModeSwitcher(value: s.mode, onChanged: vm.setMode, tint: s.on ? s.previewColor : scheme.outline),
+                      4,
+                    ),
+                    const SizedBox(height: 18),
+                    Expanded(child: enter(_ModePanel(mode: s.mode), 5)),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -208,34 +220,37 @@ class _ModePanelState extends State<_ModePanel> {
   @override
   Widget build(BuildContext context) {
     final current = ValueKey(widget.mode);
-    return AnimatedSize(
-      duration: Motion.slow,
-      curve: Motion.emphasized,
-      alignment: Alignment.topCenter,
-      child: AnimatedSwitcher(
-        duration: Motion.medium,
-        switchInCurve: Motion.emphasized,
-        switchOutCurve: Curves.easeIn,
-        layoutBuilder: (current, previous) => Stack(alignment: Alignment.topCenter, children: [...previous, ?current]),
-        transitionBuilder: (child, animation) {
-          final incoming = child.key == current;
-          final from = Offset(0.12 * _direction * (incoming ? 1 : -1), 0);
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween(begin: from, end: Offset.zero).animate(animation),
-              child: child,
-            ),
-          );
+    final bottom = MediaQuery.paddingOf(context).bottom + 16;
+    return AnimatedSwitcher(
+      duration: Motion.medium,
+      switchInCurve: Motion.emphasized,
+      switchOutCurve: Curves.easeIn,
+      layoutBuilder: (current, previous) => Stack(alignment: Alignment.topCenter, children: [...previous, ?current]),
+      transitionBuilder: (child, animation) {
+        final incoming = child.key == current;
+        final from = Offset(0.12 * _direction * (incoming ? 1 : -1), 0);
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween(begin: from, end: Offset.zero).animate(animation),
+            child: child,
+          ),
+        );
+      },
+      child: KeyedSubtree(
+        key: current,
+        child: switch (widget.mode) {
+          // Fits on any phone; scrolls only if the screen is unusually short.
+          LightMode.white => SingleChildScrollView(
+            padding: EdgeInsets.only(bottom: bottom),
+            child: const WhitePanel(),
+          ),
+          LightMode.color => Padding(
+            padding: EdgeInsets.only(bottom: bottom),
+            child: const ColorPanel(),
+          ),
+          LightMode.effect => EffectsPanel(bottomPadding: bottom),
         },
-        child: KeyedSubtree(
-          key: current,
-          child: switch (widget.mode) {
-            LightMode.white => const WhitePanel(),
-            LightMode.color => const ColorPanel(),
-            LightMode.effect => const EffectsPanel(),
-          },
-        ),
       ),
     );
   }

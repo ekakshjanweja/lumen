@@ -56,6 +56,48 @@ final class SharedPreferencesProvider
 
 String _$sharedPreferencesHash() => r'70ef90bd70df9f89260fca9b542d9f8d25d8e3cb';
 
+/// Overridden in main() with the opened box.
+
+@ProviderFor(presetBox)
+final presetBoxProvider = PresetBoxProvider._();
+
+/// Overridden in main() with the opened box.
+
+final class PresetBoxProvider
+    extends $FunctionalProvider<Box<Map<dynamic, dynamic>>, Box<Map<dynamic, dynamic>>, Box<Map<dynamic, dynamic>>>
+    with $Provider<Box<Map<dynamic, dynamic>>> {
+  /// Overridden in main() with the opened box.
+  PresetBoxProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'presetBoxProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$presetBoxHash();
+
+  @$internal
+  @override
+  $ProviderElement<Box<Map<dynamic, dynamic>>> $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
+
+  @override
+  Box<Map<dynamic, dynamic>> create(Ref ref) {
+    return presetBox(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Box<Map<dynamic, dynamic>> value) {
+    return $ProviderOverride(origin: this, providerOverride: $SyncValueProvider<Box<Map<dynamic, dynamic>>>(value));
+  }
+}
+
+String _$presetBoxHash() => r'd80a0b2162e81dd27dddd21cce490b12ede88305';
+
 @ProviderFor(preferencesService)
 final preferencesServiceProvider = PreferencesServiceProvider._();
 
@@ -237,3 +279,39 @@ final class LightRepositoryProvider extends $FunctionalProvider<LightRepository,
 }
 
 String _$lightRepositoryHash() => r'c5f0af11ede2719b9d6e2cc3acd4660b13436b7e';
+
+@ProviderFor(presetRepository)
+final presetRepositoryProvider = PresetRepositoryProvider._();
+
+final class PresetRepositoryProvider extends $FunctionalProvider<PresetRepository, PresetRepository, PresetRepository>
+    with $Provider<PresetRepository> {
+  PresetRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'presetRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$presetRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<PresetRepository> $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
+
+  @override
+  PresetRepository create(Ref ref) {
+    return presetRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PresetRepository value) {
+    return $ProviderOverride(origin: this, providerOverride: $SyncValueProvider<PresetRepository>(value));
+  }
+}
+
+String _$presetRepositoryHash() => r'eb88cc6955a91cd16d60a35547a07502b6172132';

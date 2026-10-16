@@ -13,6 +13,8 @@ dependencies:
   flutter_blue_plus: ^2.3.14
   flutter_riverpod: ^3.4.3
   freezed_annotation: ^3.1.0
+  hive_ce: ^2.22.0
+  hive_ce_flutter: ^2.5.0
   riverpod_annotation: ^4.0.7
   shared_preferences: ^2.5.6
 

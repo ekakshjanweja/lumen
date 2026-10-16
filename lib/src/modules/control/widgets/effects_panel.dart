@@ -10,7 +10,9 @@ import '../../../core/widgets/pressable.dart';
 import '../view_models/control_view_model.dart';
 
 class EffectsPanel extends ConsumerWidget {
-  const EffectsPanel({super.key});
+  const EffectsPanel({super.key, this.bottomPadding = 0});
+
+  final double bottomPadding;
 
   static const icons = {
     1: Icons.flash_on_rounded,
@@ -50,38 +52,49 @@ class EffectsPanel extends ConsumerWidget {
     final reduced = Motion.reduced(context);
     var order = 0;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final group in effectGroups) ...[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4, 4, 0, 12),
-            child: Text(
-              group.toUpperCase(),
-              style: text.labelMedium?.copyWith(color: scheme.onSurfaceVariant, letterSpacing: 1.2),
+    // Scrolls on its own so the orb preview stays in view. The top edge fades
+    // so tiles slide out of sight instead of being cut off.
+    return ShaderMask(
+      shaderCallback: (r) => const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0x00FFFFFF), Colors.white],
+        stops: [0, 0.05],
+      ).createShader(r),
+      blendMode: BlendMode.dstIn,
+      child: ListView(
+        padding: EdgeInsets.only(top: 6, bottom: bottomPadding),
+        children: [
+          for (final group in effectGroups) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 4, 0, 12),
+              child: Text(
+                group.toUpperCase(),
+                style: text.labelMedium?.copyWith(color: scheme.onSurfaceVariant, letterSpacing: 1.2),
+              ),
             ),
-          ),
-          GridView.count(
-            crossAxisCount: 3,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.zero,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            childAspectRatio: 1.1,
-            children: [
-              for (final e in effects.where((e) => e.group == group))
-                _EffectTile(
-                  effect: e,
-                  icon: icons[e.id]!,
-                  selected: selected == e.id,
-                  onTap: () => vm.selectEffect(e.id),
-                ).maybeAnimate(!reduced, order++),
-            ],
-          ),
-          const SizedBox(height: 22),
+            GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: 1.1,
+              children: [
+                for (final e in effects.where((e) => e.group == group))
+                  _EffectTile(
+                    effect: e,
+                    icon: icons[e.id]!,
+                    selected: selected == e.id,
+                    onTap: () => vm.selectEffect(e.id),
+                  ).maybeAnimate(!reduced, order++),
+              ],
+            ),
+            const SizedBox(height: 22),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

@@ -20,9 +20,10 @@ lib/
       theme/              theme and light colour helpers
       widgets/            shared widgets: orb, colour wheel, sliders, ...
     services/             platform wrappers: BLE (flutter_blue_plus), the native
-                          broadcaster (method channel), SharedPreferences
+                          broadcaster (method channel), SharedPreferences, Hive
       protocol/           wire codecs (GATT frame, broadcast beacon)
-    repositories/         sources of truth: BluetoothRepository, LightRepository
+    repositories/         sources of truth: BluetoothRepository, LightRepository,
+                          PresetRepository (saved colours, stored with Hive)
     modules/
       gate/               picks the top-level screen
       search/             finds the light by making it blink
