@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/light_state.dart';
 import '../../../core/theme/light_colors.dart';
+import '../../../core/theme/theme.dart';
+import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/track_slider.dart';
 import '../view_models/control_view_model.dart';
 
@@ -20,7 +21,7 @@ class WhitePanel extends ConsumerWidget {
       children: [
         TrackSlider(
           label: 'Temperature',
-          valueText: '${kelvin}K',
+          format: (v) => '${v.round()}K',
           value: kelvin.toDouble(),
           min: minKelvin.toDouble(),
           max: maxKelvin.toDouble(),
@@ -29,7 +30,7 @@ class WhitePanel extends ConsumerWidget {
           thumbColor: kelvinToColor(kelvin),
           onChanged: (v) => vm.setKelvin(v.round()),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
         Row(
           children: [
             for (final (k, name) in presets) ...[
@@ -70,33 +71,40 @@ class _Preset extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    return Material(
-      color: scheme.surfaceContainer,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: selected ? color : Colors.transparent, width: 1.5),
-      ),
-      child: InkWell(
-        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap();
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14),
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: Pressable(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: Motion.medium,
+          curve: Motion.emphasized,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: selected ? color.withValues(alpha: 0.14) : AppTheme.glass,
+            border: Border.all(color: selected ? color.withValues(alpha: 0.85) : AppTheme.glassBorder, width: 1.5),
+          ),
           child: Column(
             children: [
-              Container(
-                width: 16,
-                height: 16,
+              AnimatedContainer(
+                duration: Motion.medium,
+                curve: Motion.spring,
+                width: selected ? 22 : 16,
+                height: selected ? 22 : 16,
                 decoration: BoxDecoration(
                   color: color,
                   shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: color.withValues(alpha: 0.6), blurRadius: 8)],
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: selected ? 0.9 : 0.5),
+                      blurRadius: selected ? 16 : 8,
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 10),
-              Text(title, style: text.labelMedium),
+              Text(title, style: text.labelMedium?.copyWith(color: selected ? scheme.onSurface : null)),
               Text(subtitle, style: text.labelSmall?.copyWith(color: scheme.onSurfaceVariant)),
             ],
           ),

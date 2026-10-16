@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../control/widgets/control_screen.dart';
+import '../../../core/theme/theme.dart';
 import '../../../core/widgets/message_screen.dart';
 import '../../search/widgets/search_screen.dart';
 import '../view_models/app_gate_view_model.dart';
@@ -47,6 +48,15 @@ class AppGate extends ConsumerWidget {
       AppScreen.control => const ControlScreen(key: ValueKey('control')),
     };
 
-    return AnimatedSwitcher(duration: const Duration(milliseconds: 250), child: screen);
+    return AnimatedSwitcher(
+      duration: Motion.slow,
+      switchInCurve: Motion.emphasized,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, a) => FadeTransition(
+        opacity: a,
+        child: ScaleTransition(scale: Tween(begin: 0.96, end: 1.0).animate(a), child: child),
+      ),
+      child: screen,
+    );
   }
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/theme.dart';
 import '../../../core/widgets/color_wheel.dart';
+import '../../../core/widgets/pressable.dart';
 import '../view_models/control_view_model.dart';
 
 class ColorPanel extends ConsumerWidget {
@@ -18,17 +19,25 @@ class ColorPanel extends ConsumerWidget {
       children: [
         const SizedBox(height: 8),
         ColorWheel(hue: hue, saturation: saturation, onChanged: vm.setColor),
-        const SizedBox(height: 28),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            for (final h in swatches)
-              _Swatch(
-                color: HSVColor.fromAHSV(1, h.toDouble(), 1, 1).toColor(),
-                selected: hue == h && saturation == 100,
-                onTap: () => vm.setColor(h, 100),
-              ),
-          ],
+        const SizedBox(height: 32),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppTheme.glass,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: AppTheme.glassBorder),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (final h in swatches)
+                _Swatch(
+                  color: HSVColor.fromAHSV(1, h.toDouble(), 1, 1).toColor(),
+                  selected: hue == h && saturation == 100,
+                  onTap: () => vm.setColor(h, 100),
+                ),
+            ],
+          ),
         ),
       ],
     );
@@ -48,20 +57,22 @@ class _Swatch extends StatelessWidget {
       button: true,
       selected: selected,
       label: 'Color preset',
-      child: GestureDetector(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap();
-        },
+      child: Pressable(
+        onTap: onTap,
+        scale: 0.85,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: 36,
-          height: 36,
+          duration: Motion.medium,
+          curve: Motion.spring,
+          width: 34,
+          height: 34,
+          padding: EdgeInsets.all(selected ? 4 : 0),
           decoration: BoxDecoration(
-            color: color,
             shape: BoxShape.circle,
-            border: Border.all(color: selected ? Colors.white : Colors.transparent, width: 3),
-            boxShadow: [BoxShadow(color: color.withValues(alpha: selected ? 0.7 : 0.0), blurRadius: 12)],
+            border: Border.all(color: selected ? Colors.white : Colors.transparent, width: 2),
+            boxShadow: [BoxShadow(color: color.withValues(alpha: selected ? 0.8 : 0.0), blurRadius: 14)],
+          ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
         ),
       ),

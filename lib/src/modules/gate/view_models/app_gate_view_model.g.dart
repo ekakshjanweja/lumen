@@ -14,8 +14,7 @@ part of 'app_gate_view_model.dart';
 final appGateViewModelProvider = AppGateViewModelProvider._();
 
 /// Decides which top-level screen to show.
-final class AppGateViewModelProvider
-    extends $NotifierProvider<AppGateViewModel, AppGateState> {
+final class AppGateViewModelProvider extends $NotifierProvider<AppGateViewModel, AppGateState> {
   /// Decides which top-level screen to show.
   AppGateViewModelProvider._()
     : super(
@@ -37,10 +36,7 @@ final class AppGateViewModelProvider
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(AppGateState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<AppGateState>(value),
-    );
+    return $ProviderOverride(origin: this, providerOverride: $SyncValueProvider<AppGateState>(value));
   }
 }
 
@@ -55,13 +51,7 @@ abstract class _$AppGateViewModel extends $Notifier<AppGateState> {
   WhenComplete runBuild() {
     final ref = this.ref as $Ref<AppGateState, AppGateState>;
     final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AppGateState, AppGateState>,
-              AppGateState,
-              Object?,
-              Object?
-            >;
+        ref.element as $ClassProviderElement<AnyNotifier<AppGateState, AppGateState>, AppGateState, Object?, Object?>;
     return element.handleCreate(ref, build);
   }
 }

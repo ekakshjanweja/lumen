@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/providers.dart';
@@ -36,6 +37,23 @@ class _LumenAppState extends ConsumerState<LumenApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'Lumen', debugShowCheckedModeBanner: false, theme: AppTheme.dark, home: const AppGate());
+    return MaterialApp(
+      title: 'Lumen',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.dark,
+      // Draw behind transparent system bars so the ambient glow reaches the edges.
+      builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarIconBrightness: Brightness.light,
+          systemNavigationBarContrastEnforced: false,
+        ),
+        child: child!,
+      ),
+      home: const AppGate(),
+    );
   }
 }

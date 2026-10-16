@@ -14,8 +14,7 @@ part of 'control_view_model.dart';
 final controlViewModelProvider = ControlViewModelProvider._();
 
 /// Everything the control screen can do to the light.
-final class ControlViewModelProvider
-    extends $NotifierProvider<ControlViewModel, ControlState> {
+final class ControlViewModelProvider extends $NotifierProvider<ControlViewModel, ControlState> {
   /// Everything the control screen can do to the light.
   ControlViewModelProvider._()
     : super(
@@ -37,10 +36,7 @@ final class ControlViewModelProvider
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(ControlState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<ControlState>(value),
-    );
+    return $ProviderOverride(origin: this, providerOverride: $SyncValueProvider<ControlState>(value));
   }
 }
 
@@ -55,13 +51,7 @@ abstract class _$ControlViewModel extends $Notifier<ControlState> {
   WhenComplete runBuild() {
     final ref = this.ref as $Ref<ControlState, ControlState>;
     final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<ControlState, ControlState>,
-              ControlState,
-              Object?,
-              Object?
-            >;
+        ref.element as $ClassProviderElement<AnyNotifier<ControlState, ControlState>, ControlState, Object?, Object?>;
     return element.handleCreate(ref, build);
   }
 }

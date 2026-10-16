@@ -14,7 +14,8 @@ part 'providers.g.dart';
 
 /// Overridden in main() with the loaded instance.
 @Riverpod(keepAlive: true)
-SharedPreferences sharedPreferences(Ref ref) => throw UnimplementedError('sharedPreferencesProvider must be overridden');
+SharedPreferences sharedPreferences(Ref ref) =>
+    throw UnimplementedError('sharedPreferencesProvider must be overridden');
 
 @Riverpod(keepAlive: true)
 PreferencesService preferencesService(Ref ref) => PreferencesService(ref.watch(sharedPreferencesProvider));

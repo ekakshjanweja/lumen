@@ -22,8 +22,7 @@ final searchViewModelProvider = SearchViewModelProvider._();
 /// 1. blink the factory-default channel and ask the user to confirm;
 /// 2. otherwise sweep every channel and group, turning the light red;
 /// 3. narrow down by flashing the last few candidates one at a time.
-final class SearchViewModelProvider
-    extends $NotifierProvider<SearchViewModel, SearchState> {
+final class SearchViewModelProvider extends $NotifierProvider<SearchViewModel, SearchState> {
   /// Finds the light by making it react, since channel lights never show up
   /// in a Bluetooth scan:
   /// 1. blink the factory-default channel and ask the user to confirm;
@@ -49,10 +48,7 @@ final class SearchViewModelProvider
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(SearchState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<SearchState>(value),
-    );
+    return $ProviderOverride(origin: this, providerOverride: $SyncValueProvider<SearchState>(value));
   }
 }
 
@@ -71,13 +67,7 @@ abstract class _$SearchViewModel extends $Notifier<SearchState> {
   WhenComplete runBuild() {
     final ref = this.ref as $Ref<SearchState, SearchState>;
     final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<SearchState, SearchState>,
-              SearchState,
-              Object?,
-              Object?
-            >;
+        ref.element as $ClassProviderElement<AnyNotifier<SearchState, SearchState>, SearchState, Object?, Object?>;
     return element.handleCreate(ref, build);
   }
 }

@@ -39,6 +39,16 @@ without running the generator first.
 Dependencies only point downwards: views -> view models -> repositories -> services.
 Views never touch repositories, and view models never touch Bluetooth APIs.
 
+## Design
+
+Dark, light-first UI: the orb in the middle glows in the light's colour and plays a soft
+preview of the selected effect (kept under 3 flashes a second), with ambient colour
+drifting behind the page. Motion uses shared durations and curves (`Motion` in
+`core/theme/theme.dart`), [flutter_animate](https://pub.dev/packages/flutter_animate) for
+entrances, and all looping animation stops when the system asks for reduced motion.
+The bundled font is [Manrope](https://github.com/googlefonts/manrope) (SIL OFL,
+`assets/fonts/Manrope-OFL.txt`).
+
 ## Two kinds of light
 
 - **Channel lights** never appear in a scan. The app broadcasts the light's state on its
