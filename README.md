@@ -26,13 +26,14 @@ one bug worth mentioning: the stock app's code addresses "all groups" as 255 in 
 
 - **finds your light without setup codes.** lumen makes the light blink and asks if you saw it. if the light was moved off its default channel, it checks every channel and group until you say it turned red.
 - **white**: 2500 K to 9900 K, plus tungsten, neutral, daylight and cloudy presets.
-- **color**: a color pad for hue and saturation, a quick presets row, and a presets sheet with 12 built-in colors. you can save your own colors by name and delete them.
+- **color**: a color pad for hue and saturation, a quick presets row, and a presets sheet with 12 built-in colors. save your own by name. tap edit (or long-press any preset) to delete them, built-in ones too. deleted built-ins can be restored.
 - **effects**: all 24 effects the light has:
   - ambient: tv, candle, flame 1-2, romantic
   - emergency: police, ambulance, fire truck
   - flash & strobe: flash 1-2, strobe 1-3
   - party: chase 1-3, fireworks 1-3, club 1-2, music, wave 1-2
-- **brightness and power**: big brightness slider. tap the light on screen to turn the real one on or off.
+- **brightness**: a tall pill like the ios flashlight control. drag moves the level relative to your finger, it stretches when you pull past the ends, and there's a haptic tick every 10%. drag all the way down to turn the light off.
+- **power**: tap the light on screen to turn the real one on or off. it comes back at the last brightness.
 - **live preview**: the on-screen light glows in your color and plays a soft preview of the selected effect.
 - **remembers stuff**: your light, its last setting and your saved colors stay on the phone. open the app and the light goes back to how you left it.
 
@@ -131,7 +132,7 @@ lib/
       providers.dart      dependency graph (services -> repositories)
       models/             pure models: LightState, PairedLight, Effect, ColorPreset, ...
       theme/              theme, motion, light colors, effect previews
-      widgets/            shared widgets: light orb, color pad, sliders, ...
+      widgets/            shared widgets: light orb, brightness pill, color pad, ...
     services/             platform wrappers: ble (flutter_blue_plus), the native
                           broadcaster (method channel), SharedPreferences, hive
       protocol/           wire codecs (gatt frame, broadcast beacon)
