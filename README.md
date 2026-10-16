@@ -1,7 +1,7 @@
 # Lumen
 
 Controls LTF_MWRGB / LYD_MWRGB lights (the "LEDLYD" app's lights) on Android and iOS.
-The wire formats are in `lib/data/services/protocol/` (frame and beacon codecs).
+The wire formats are in `lib/src/services/protocol/` (frame and beacon codecs).
 
 ## Architecture
 
@@ -11,20 +11,24 @@ dependency injection and view-model state.
 
 ```
 lib/
-  main.dart, app.dart     bootstrap, lifecycle, MaterialApp
-  config/providers.dart   dependency graph (services -> repositories)
-  domain/models/          pure models: LightState, PairedLight, Effect, ...
-  data/
+  main.dart               bootstrap: preferences, provider container, runApp
+  src/
+    app.dart              lifecycle, MaterialApp
+    core/
+      providers.dart      dependency graph (services -> repositories)
+      models/             pure models: LightState, PairedLight, Effect, ...
+      theme/              theme and light colour helpers
+      widgets/            shared widgets: orb, colour wheel, sliders, ...
     services/             platform wrappers: BLE (flutter_blue_plus), the native
-                          broadcaster (method channel), SharedPreferences, wire codecs
+                          broadcaster (method channel), SharedPreferences
+      protocol/           wire codecs (GATT frame, broadcast beacon)
     repositories/         sources of truth: BluetoothRepository, LightRepository
-  ui/
-    core/                 theme and shared widgets
-    gate/                 picks the top-level screen
-    search/               finds the light by making it blink
-    control/              colors, white, effects
-      view_models/        Riverpod Notifiers: immutable state + intent methods
-      widgets/            views: read state, call view-model methods
+    modules/
+      gate/               picks the top-level screen
+      search/             finds the light by making it blink
+      control/            colors, white, effects
+        view_models/      Riverpod Notifiers: immutable state + intent methods
+        widgets/          views: read state, call view-model methods
 ```
 
 Dependencies only point downwards: views -> view models -> repositories -> services.
@@ -41,7 +45,7 @@ Views never touch repositories, and view models never touch Bluetooth APIs.
 ## Commands
 
 ```sh
-flutter test                       # codecs + view models (fake repositories in test/testing)
+flutter test                       # codecs + view models (fake repositories in test/testing; tests mirror lib/src)
 flutter build apk --release
 flutter build ios --release        # needs a signing team set in Xcode
 ```

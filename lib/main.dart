@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'app.dart';
-import 'config/providers.dart';
+import 'src/app.dart';
+import 'src/core/providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

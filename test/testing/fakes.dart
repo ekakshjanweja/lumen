@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lumen/config/providers.dart';
-import 'package:lumen/data/repositories/bluetooth_repository.dart';
-import 'package:lumen/data/repositories/light_repository.dart';
-import 'package:lumen/domain/models/bluetooth_status.dart';
-import 'package:lumen/domain/models/light_connection.dart';
-import 'package:lumen/domain/models/light_state.dart';
-import 'package:lumen/domain/models/paired_light.dart';
+import 'package:lumen/src/core/providers.dart';
+import 'package:lumen/src/repositories/bluetooth_repository.dart';
+import 'package:lumen/src/repositories/light_repository.dart';
+import 'package:lumen/src/core/models/bluetooth_status.dart';
+import 'package:lumen/src/core/models/light_connection.dart';
+import 'package:lumen/src/core/models/light_state.dart';
+import 'package:lumen/src/core/models/paired_light.dart';
 
 /// In-memory light repository that records what the view models asked for.
 class FakeLightRepository implements LightRepository {
