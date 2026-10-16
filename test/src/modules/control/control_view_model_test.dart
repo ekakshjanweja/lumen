@@ -25,6 +25,15 @@ void main() {
     expect(c.read(controlViewModelProvider).light.brightness, 1);
   });
 
+  test('level 0 turns the light off and keeps the last brightness', () {
+    final c = makeContainer(lights: lights);
+    c.read(controlViewModelProvider.notifier)
+      ..setLevel(65)
+      ..setLevel(0);
+
+    expect(lights.applied.map((s) => (s.on, s.brightness)), [(true, 65), (false, 65)]);
+  });
+
   test('toggle power flips on/off without touching other fields', () {
     final c = makeContainer(lights: lights);
     c.read(controlViewModelProvider.notifier)

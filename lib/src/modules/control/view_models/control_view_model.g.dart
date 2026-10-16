@@ -40,7 +40,7 @@ final class ControlViewModelProvider extends $NotifierProvider<ControlViewModel,
   }
 }
 
-String _$controlViewModelHash() => r'8a78aae903039fa86fbd61426bf8a454cae4f1d5';
+String _$controlViewModelHash() => r'd389c184e36d6f9df50f824d7c6f9a9fb69f74aa';
 
 /// Everything the control screen can do to the light.
 

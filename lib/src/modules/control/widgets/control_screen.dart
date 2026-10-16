@@ -10,7 +10,7 @@ import '../../../core/widgets/ambient_background.dart';
 import '../../../core/widgets/light_orb.dart';
 import '../../../core/widgets/mode_switcher.dart';
 import '../../../core/widgets/pressable.dart';
-import '../../../core/widgets/track_slider.dart';
+import '../../../core/widgets/level_slider.dart';
 import '../view_models/control_view_model.dart';
 import 'color_panel.dart';
 import 'effects_panel.dart';
@@ -44,45 +44,48 @@ class ControlScreen extends ConsumerWidget {
           // rest of the screen. The orb gives up some size on short screens.
           child: LayoutBuilder(
             builder: (context, c) {
-              // Header, readout, slider, mode tabs and gaps take about 284pt;
-              // the panel gets ~330pt first, and the orb takes what's left.
-              final orb = (c.maxHeight - 284 - 330).clamp(110.0, 236.0);
+              // Header, the orb row's readout, mode tabs and gaps take about 218pt.
+              // The panel gets ~330pt first; the orb takes what's left and has to
+              // fit beside the brightness pill.
+              const pill = 84.0;
+              final orb = (c.maxHeight - 218 - 330).clamp(110.0, 236.0).clamp(110.0, c.maxWidth - 40 - pill - 16);
               return Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     enter(_Header(state: state, onSearch: () => _confirmSearch(context, vm)), 0),
+                    const SizedBox(height: 4),
                     enter(
-                      Center(
-                        child: LightOrb(light: s, onToggle: vm.togglePower, size: orb),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              children: [
+                                LightOrb(light: s, onToggle: vm.togglePower, size: orb),
+                                _Readout(light: s),
+                              ],
+                            ),
+                          ),
+                          LevelSlider(
+                            value: s.on ? s.brightness : 0,
+                            on: s.on,
+                            color: Color.lerp(s.previewColor, Colors.white, 0.55)!,
+                            width: pill,
+                            height: orb + 70,
+                            onChanged: vm.setLevel,
+                          ),
+                        ],
                       ),
                       1,
                     ),
-                    enter(_Readout(light: s), 2),
-                    const SizedBox(height: 20),
-                    enter(
-                      TrackSlider(
-                        label: 'Brightness',
-                        icon: Icons.brightness_6_rounded,
-                        format: (v) => '${v.round()}%',
-                        value: s.brightness.toDouble(),
-                        min: 1,
-                        max: 100,
-                        fillColor: s.on
-                            ? Color.lerp(s.previewColor, Colors.white, 0.12)
-                            : scheme.surfaceContainerHighest,
-                        onChanged: (v) => vm.setBrightness(v.round()),
-                      ),
-                      3,
-                    ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 22),
                     enter(
                       ModeSwitcher(value: s.mode, onChanged: vm.setMode, tint: s.on ? s.previewColor : scheme.outline),
-                      4,
+                      2,
                     ),
                     const SizedBox(height: 18),
-                    Expanded(child: enter(_ModePanel(mode: s.mode), 5)),
+                    Expanded(child: enter(_ModePanel(mode: s.mode), 3)),
                   ],
                 ),
               );

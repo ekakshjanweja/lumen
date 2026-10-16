@@ -3,8 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../theme/theme.dart';
 
-/// A large, full-width slider. With [gradient] it draws a colour track and a
-/// ring thumb (temperature, hue); otherwise it fills from the left (brightness).
+/// A full-width colour track with a pill thumb, e.g. colour temperature.
 /// Taps glide to the new value; drags follow the finger exactly.
 class TrackSlider extends StatefulWidget {
   const TrackSlider({
@@ -15,9 +14,7 @@ class TrackSlider extends StatefulWidget {
     required this.min,
     required this.max,
     required this.onChanged,
-    this.icon,
-    this.gradient,
-    this.fillColor,
+    required this.gradient,
     this.thumbColor,
     this.step = 1,
   });
@@ -31,9 +28,7 @@ class TrackSlider extends StatefulWidget {
   final double max;
   final double step;
   final ValueChanged<double> onChanged;
-  final IconData? icon;
-  final Gradient? gradient;
-  final Color? fillColor;
+  final Gradient gradient;
   final Color? thumbColor;
 
   @override
@@ -59,7 +54,6 @@ class _TrackSliderState extends State<TrackSlider> {
   @override
   Widget build(BuildContext context) {
     final w = widget;
-    final hasGradient = w.gradient != null;
     final track = LayoutBuilder(
       builder: (context, c) {
         final width = c.maxWidth;
@@ -85,7 +79,7 @@ class _TrackSliderState extends State<TrackSlider> {
               scale: _dragging ? 1.015 : 1,
               duration: Motion.medium,
               curve: Motion.spring,
-              child: hasGradient ? _gradientTrack(width, t) : _fillTrack(context, width, t),
+              child: _track(width, t),
             ),
           ),
         );
@@ -102,64 +96,11 @@ class _TrackSliderState extends State<TrackSlider> {
       decreasedValue: w.format(down),
       onIncrease: () => w.onChanged(up),
       onDecrease: () => w.onChanged(down),
-      child: hasGradient ? _withHeader(context, track) : track,
+      child: _withHeader(context, track),
     );
   }
 
-  Widget _fillTrack(BuildContext context, double width, double t) {
-    final scheme = Theme.of(context).colorScheme;
-    final text = Theme.of(context).textTheme;
-    final fill = widget.fillColor ?? scheme.primary;
-    final darkInk = fill.computeLuminance() > 0.5;
-    Color ink(double at) =>
-        t >= at ? (darkInk ? Colors.black.withValues(alpha: 0.78) : Colors.white) : scheme.onSurface;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(22),
-      child: SizedBox(
-        height: 64,
-        child: Stack(
-          children: [
-            const Positioned.fill(child: ColoredBox(color: AppTheme.glass)),
-            Positioned(
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: width * t,
-              child: AnimatedContainer(
-                duration: Motion.medium,
-                decoration: BoxDecoration(gradient: LinearGradient(colors: [fill.withValues(alpha: 0.7), fill])),
-              ),
-            ),
-            Positioned.fill(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    if (widget.icon != null) ...[
-                      Icon(widget.icon, size: 20, color: ink(0.08)),
-                      const SizedBox(width: 10),
-                    ],
-                    Text(widget.label, style: text.titleSmall?.copyWith(color: ink(0.3))),
-                    const Spacer(),
-                    Text(
-                      widget.format(widget.value),
-                      style: text.titleSmall?.copyWith(
-                        color: ink(0.88),
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _gradientTrack(double width, double t) {
+  Widget _track(double width, double t) {
     const thumbWidth = 22.0;
     return SizedBox(
       height: 50,

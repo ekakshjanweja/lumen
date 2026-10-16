@@ -56,6 +56,10 @@ class ControlViewModel extends _$ControlViewModel {
 
   void setBrightness(int value) => _apply((s) => s.copyWith(brightness: value.clamp(1, 100), on: true));
 
+  /// Brightness where 0 means off, like dragging a flashlight all the way down.
+  /// The last brightness is kept, so turning back on restores it.
+  void setLevel(int level) => level <= 0 ? _apply((s) => s.copyWith(on: false)) : setBrightness(level);
+
   void setMode(LightMode mode) => _apply((s) => s.copyWith(mode: mode, on: true));
 
   void setKelvin(int kelvin) => _apply((s) => s.copyWith(kelvin: kelvin.clamp(minKelvin, maxKelvin), on: true));
