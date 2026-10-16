@@ -44,47 +44,50 @@ class ControlScreen extends ConsumerWidget {
           // rest of the screen. The orb gives up some size on short screens.
           child: LayoutBuilder(
             builder: (context, c) {
-              // Header, the orb row's readout, mode tabs and gaps take about 218pt.
-              // The panel gets ~330pt first; the orb takes what's left and has to
-              // fit beside the brightness pill.
+              // One rhythm for the whole page: 20 / 24 / 20 between sections.
+              // The header, tabs and gaps take ~186pt and the panel gets ~330pt
+              // first. The hero takes what's left, capped by the width beside the pill.
               const pill = 84.0;
-              final orb = (c.maxHeight - 218 - 330).clamp(110.0, 236.0).clamp(110.0, c.maxWidth - 40 - pill - 16);
+              final side = c.maxWidth - 40 - pill - 16;
+              final hero = (c.maxHeight - 186 - 330).clamp(150.0, 260.0).clamp(150.0, side);
               return Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     enter(_Header(state: state, onSearch: () => _confirmSearch(context, vm)), 0),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 20),
                     enter(
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              children: [
-                                LightOrb(light: s, onToggle: vm.togglePower, size: orb),
-                                _Readout(light: s),
-                              ],
+                      SizedBox(
+                        height: hero,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Center(
+                                child: LightOrb(light: s, onToggle: vm.togglePower, size: hero),
+                              ),
                             ),
-                          ),
-                          LevelSlider(
-                            value: s.on ? s.brightness : 0,
-                            on: s.on,
-                            color: Color.lerp(s.previewColor, Colors.white, 0.55)!,
-                            width: pill,
-                            height: orb + 70,
-                            onChanged: vm.setLevel,
-                          ),
-                        ],
+                            const SizedBox(width: 16),
+                            // Same height as the visible orb, which sits inside its glow margin.
+                            LevelSlider(
+                              value: s.on ? s.brightness : 0,
+                              on: s.on,
+                              color: Color.lerp(s.previewColor, Colors.white, 0.55)!,
+                              width: pill,
+                              height: hero * 0.86,
+                              onChanged: vm.setLevel,
+                            ),
+                          ],
+                        ),
                       ),
                       1,
                     ),
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 24),
                     enter(
                       ModeSwitcher(value: s.mode, onChanged: vm.setMode, tint: s.on ? s.previewColor : scheme.outline),
                       2,
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 20),
                     Expanded(child: enter(_ModePanel(mode: s.mode), 3)),
                   ],
                 ),
@@ -102,6 +105,7 @@ class ControlScreen extends ConsumerWidget {
   }
 }
 
+/// Name, with a live status line: "65% · 3200K", "Off", or the link state.
 class _Header extends StatelessWidget {
   const _Header({required this.state, required this.onSearch});
 
@@ -119,7 +123,13 @@ class _Header extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(state.name, style: text.headlineSmall),
-              if (state.showsLinkStatus) ...[const SizedBox(height: 2), _LinkStatus(state.status)],
+              const SizedBox(height: 2),
+              Row(
+                children: [
+                  if (state.showsLinkStatus) ...[_LinkStatus(state.status), const SizedBox(width: 8)],
+                  Flexible(child: _Status(light: state.light)),
+                ],
+              ),
             ],
           ),
         ),
@@ -144,58 +154,45 @@ class _Header extends StatelessWidget {
   }
 }
 
-/// Big brightness number with a caption, both animating as they change.
-class _Readout extends StatelessWidget {
-  const _Readout({required this.light});
+/// Brightness counts to its new value; the caption cross-fades when the
+/// mode or colour changes.
+class _Status extends StatelessWidget {
+  const _Status({required this.light});
 
   final LightState light;
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    final scheme = Theme.of(context).colorScheme;
-    final big = text.displaySmall!.copyWith(fontFeatures: const [FontFeature.tabularFigures()], height: 1.1);
-
-    return Column(
-      children: [
-        AnimatedSwitcher(
-          duration: Motion.medium,
-          transitionBuilder: (child, a) => FadeTransition(
-            opacity: a,
-            child: ScaleTransition(scale: Tween(begin: 0.9, end: 1.0).animate(a), child: child),
-          ),
-          child: light.on
-              ? TweenAnimationBuilder<double>(
-                  key: const ValueKey('on'),
-                  tween: Tween(end: light.brightness.toDouble()),
-                  duration: Motion.medium,
-                  curve: Motion.emphasized,
-                  builder: (context, v, _) => Text('${v.round()}%', style: big),
-                )
-              : Text(
-                  'Off',
-                  key: const ValueKey('off'),
-                  style: big.copyWith(color: scheme.onSurfaceVariant),
-                ),
+    final style = Theme.of(context).textTheme.titleMedium!.copyWith(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      fontWeight: FontWeight.w600,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+    return AnimatedSwitcher(
+      duration: Motion.medium,
+      layoutBuilder: (current, previous) => Stack(alignment: Alignment.centerLeft, children: [...previous, ?current]),
+      transitionBuilder: (child, a) => FadeTransition(
+        opacity: a,
+        child: SlideTransition(
+          position: Tween(begin: const Offset(0, 0.3), end: Offset.zero).animate(a),
+          child: child,
         ),
-        const SizedBox(height: 2),
-        AnimatedSwitcher(
-          duration: Motion.medium,
-          transitionBuilder: (child, a) => FadeTransition(
-            opacity: a,
-            child: SlideTransition(
-              position: Tween(begin: const Offset(0, 0.4), end: Offset.zero).animate(a),
-              child: child,
-            ),
-          ),
-          child: Text(
-            light.on ? light.caption : 'Tap the light to turn it on',
-            // Kelvin changes on every drag step, so only mode or colour changes animate.
-            key: ValueKey((light.on, light.mode, light.mode == LightMode.white ? null : light.caption)),
-            style: text.titleMedium?.copyWith(color: scheme.onSurfaceVariant),
-          ),
-        ),
-      ],
+      ),
+      child: light.on
+          ? TweenAnimationBuilder<double>(
+              // Kelvin changes on every drag step, so only mode or colour changes animate.
+              key: ValueKey((light.mode, light.mode == LightMode.white ? null : light.caption)),
+              tween: Tween(end: light.brightness.toDouble()),
+              duration: Motion.medium,
+              curve: Motion.emphasized,
+              builder: (context, v, _) => Text(
+                '${v.round()}%  ·  ${light.caption}',
+                style: style,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            )
+          : Text('Off', key: const ValueKey('off'), style: style),
     );
   }
 }
@@ -243,8 +240,7 @@ class _ModePanelState extends State<_ModePanel> {
       child: KeyedSubtree(
         key: current,
         child: switch (widget.mode) {
-          // Fits on any phone; scrolls only if the screen is unusually short.
-          LightMode.white => SingleChildScrollView(
+          LightMode.white => Padding(
             padding: EdgeInsets.only(bottom: bottom),
             child: const WhitePanel(),
           ),
