@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers.dart';
 import '../../../repositories/bluetooth_repository.dart';
@@ -9,31 +9,25 @@ import '../../../repositories/light_repository.dart';
 import '../../../core/models/bluetooth_status.dart';
 import '../../../core/models/paired_light.dart';
 
+part 'app_gate_view_model.freezed.dart';
+part 'app_gate_view_model.g.dart';
+
 enum AppScreen { splash, bluetoothOff, permission, search, control }
 
-@immutable
-class AppGateState {
-  const AppGateState(this.screen, {this.canTurnOnBluetooth = false, this.needsSettings = false});
+@freezed
+abstract class AppGateState with _$AppGateState {
+  const factory AppGateState(
+    AppScreen screen, {
+    @Default(false) bool canTurnOnBluetooth,
 
-  final AppScreen screen;
-  final bool canTurnOnBluetooth;
-
-  /// The permission can only be granted from system settings now.
-  final bool needsSettings;
-
-  @override
-  bool operator ==(Object other) =>
-      other is AppGateState &&
-      other.screen == screen &&
-      other.canTurnOnBluetooth == canTurnOnBluetooth &&
-      other.needsSettings == needsSettings;
-
-  @override
-  int get hashCode => Object.hash(screen, canTurnOnBluetooth, needsSettings);
+    /// The permission can only be granted from system settings now.
+    @Default(false) bool needsSettings,
+  }) = _AppGateState;
 }
 
 /// Decides which top-level screen to show.
-class AppGateViewModel extends Notifier<AppGateState> {
+@Riverpod(keepAlive: true)
+class AppGateViewModel extends _$AppGateViewModel {
   late BluetoothRepository _bluetooth;
   late LightRepository _lights;
   bool _askedPermission = false;
@@ -92,5 +86,3 @@ class AppGateViewModel extends Notifier<AppGateState> {
 
   Future<void> openSettings() => _bluetooth.openAppSettings();
 }
-
-final appGateViewModelProvider = NotifierProvider<AppGateViewModel, AppGateState>(AppGateViewModel.new);

@@ -1,8 +1,10 @@
-class Effect {
-  const Effect(this.id, this.name, this.group);
-  final int id;
-  final String name;
-  final String group;
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'effect.freezed.dart';
+
+@freezed
+abstract class Effect with _$Effect {
+  const factory Effect(int id, String name, String group) = _Effect;
 }
 
 /// Display order of effect groups.

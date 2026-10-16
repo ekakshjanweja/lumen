@@ -16,7 +16,7 @@ class FakeLightRepository implements LightRepository {
   final _stateChanges = StreamController<LightState>.broadcast();
 
   @override
-  LightConnection connection = const LightConnection.none();
+  LightConnection connection = LightConnection.none;
   @override
   LightState state = const LightState();
 
@@ -64,7 +64,7 @@ class FakeLightRepository implements LightRepository {
   @override
   Future<void> forget() async {
     forgotten = true;
-    setConnection(const LightConnection.none());
+    setConnection(LightConnection.none);
   }
 
   @override

@@ -11,7 +11,7 @@ void main() {
 
   setUp(() {
     lights = FakeLightRepository()
-      ..connection = const LightConnection(ChannelLight.factoryDefault, LinkStatus.connected)
+      ..connection = const LightConnection(PairedLight.factoryDefault, LinkStatus.connected)
       ..state = const LightState(on: false, brightness: 40);
   });
 

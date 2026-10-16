@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../repositories/bluetooth_repository.dart';
@@ -7,25 +7,33 @@ import '../services/beacon_service.dart';
 import '../services/ble_service.dart';
 import '../services/preferences_service.dart';
 
+part 'providers.g.dart';
+
 /// Dependency graph. Services wrap platform APIs; repositories own app data
 /// and are what view models depend on. Tests override the repositories.
 
 /// Overridden in main() with the loaded instance.
-final sharedPreferencesProvider = Provider<SharedPreferences>(
-  (ref) => throw UnimplementedError('sharedPreferencesProvider must be overridden'),
-);
+@Riverpod(keepAlive: true)
+SharedPreferences sharedPreferences(Ref ref) => throw UnimplementedError('sharedPreferencesProvider must be overridden');
 
-final preferencesServiceProvider = Provider((ref) => PreferencesService(ref.watch(sharedPreferencesProvider)));
-final beaconServiceProvider = Provider((ref) => BeaconService());
-final bleServiceProvider = Provider((ref) => BleService());
+@Riverpod(keepAlive: true)
+PreferencesService preferencesService(Ref ref) => PreferencesService(ref.watch(sharedPreferencesProvider));
 
-final bluetoothRepositoryProvider = Provider((ref) {
+@Riverpod(keepAlive: true)
+BeaconService beaconService(Ref ref) => BeaconService();
+
+@Riverpod(keepAlive: true)
+BleService bleService(Ref ref) => BleService();
+
+@Riverpod(keepAlive: true)
+BluetoothRepository bluetoothRepository(Ref ref) {
   final repo = BluetoothRepository(ble: ref.watch(bleServiceProvider), beacon: ref.watch(beaconServiceProvider));
   ref.onDispose(repo.dispose);
   return repo;
-});
+}
 
-final lightRepositoryProvider = Provider((ref) {
+@Riverpod(keepAlive: true)
+LightRepository lightRepository(Ref ref) {
   final repo = LightRepository(
     beacon: ref.watch(beaconServiceProvider),
     ble: ref.watch(bleServiceProvider),
@@ -33,4 +41,4 @@ final lightRepositoryProvider = Provider((ref) {
   );
   ref.onDispose(repo.dispose);
   return repo;
-});
+}

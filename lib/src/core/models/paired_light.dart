@@ -1,4 +1,6 @@
-import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'paired_light.freezed.dart';
 
 /// Number of channels a broadcast light can be set to (1-100).
 const channelCount = 100;
@@ -11,42 +13,15 @@ const allGroups = 7;
 const groupCount = 6;
 
 /// The light the app controls.
-sealed class PairedLight {
-  const PairedLight();
-}
+@freezed
+sealed class PairedLight with _$PairedLight {
+  /// A broadcast-only light. It never appears in a Bluetooth scan and follows
+  /// commands sent on its channel and group.
+  const factory PairedLight.channel(int channel, int group) = ChannelLight;
 
-/// A broadcast-only light. It never appears in a Bluetooth scan and follows
-/// commands sent on its channel and group.
-@immutable
-final class ChannelLight extends PairedLight {
-  const ChannelLight(this.channel, this.group);
+  /// A light that advertises itself and is controlled over a GATT connection.
+  const factory PairedLight.connected(String id, String name) = ConnectedLight;
 
+  /// Where a light is out of the box.
   static const factoryDefault = ChannelLight(defaultChannel, allGroups);
-
-  final int channel;
-  final int group;
-
-  @override
-  bool operator ==(Object other) => other is ChannelLight && other.channel == channel && other.group == group;
-
-  @override
-  int get hashCode => Object.hash(channel, group);
-
-  @override
-  String toString() => 'ChannelLight($channel, $group)';
-}
-
-/// A light that advertises itself and is controlled over a GATT connection.
-@immutable
-final class ConnectedLight extends PairedLight {
-  const ConnectedLight(this.id, this.name);
-
-  final String id;
-  final String name;
-
-  @override
-  bool operator ==(Object other) => other is ConnectedLight && other.id == id;
-
-  @override
-  int get hashCode => id.hashCode;
 }

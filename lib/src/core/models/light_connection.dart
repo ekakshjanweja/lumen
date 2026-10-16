@@ -1,32 +1,26 @@
-import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'paired_light.dart';
+
+part 'light_connection.freezed.dart';
 
 enum LinkStatus { connecting, connected, reconnecting }
 
 /// The paired light, if any, and whether commands can reach it.
-@immutable
-class LightConnection {
-  const LightConnection(this.light, this.status);
-  const LightConnection.none() : light = null, status = LinkStatus.connecting;
+@freezed
+abstract class LightConnection with _$LightConnection {
+  const LightConnection._();
 
-  final PairedLight? light;
-  final LinkStatus status;
+  const factory LightConnection(PairedLight? light, LinkStatus status) = _LightConnection;
+
+  /// Nothing paired yet.
+  static const none = LightConnection(null, LinkStatus.connecting);
 
   bool get hasLight => light != null;
-
-  @override
-  bool operator ==(Object other) => other is LightConnection && other.light == light && other.status == status;
-
-  @override
-  int get hashCode => Object.hash(light, status);
 }
 
 /// A light found in a Bluetooth scan (only connectable lights show up).
-@immutable
-class FoundLight {
-  const FoundLight(this.id, this.name, this.rssi);
-  final String id;
-  final String name;
-  final int rssi;
+@freezed
+abstract class FoundLight with _$FoundLight {
+  const factory FoundLight(String id, String name, int rssi) = _FoundLight;
 }

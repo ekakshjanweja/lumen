@@ -26,11 +26,11 @@ void main() {
     await vm().search();
 
     expect(state().step, SearchStep.blinking);
-    expect(lights.probes.first.$1, ChannelLight.factoryDefault);
+    expect(lights.probes.first.$1, PairedLight.factoryDefault);
     expect(lights.probes.first.$2.mode, LightMode.white);
 
     await vm().confirmBlinking();
-    expect(lights.paired, ChannelLight.factoryDefault);
+    expect(lights.paired, PairedLight.factoryDefault);
   });
 
   test('declined permission stays on the intro without broadcasting', () async {
@@ -71,7 +71,7 @@ void main() {
   });
 
   test('sweep never repeats the factory default it already tried', () {
-    expect(SearchViewModel.sweepOrder, isNot(contains(ChannelLight.factoryDefault)));
+    expect(SearchViewModel.sweepOrder, isNot(contains(PairedLight.factoryDefault)));
     expect(SearchViewModel.sweepOrder.toSet().length, SearchViewModel.sweepOrder.length);
     expect(SearchViewModel.sweepOrder.length, channelCount * (groupCount + 1) - 1);
   });

@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers.dart';
 import '../../../repositories/light_repository.dart';
@@ -7,12 +7,14 @@ import '../../../core/models/light_connection.dart';
 import '../../../core/models/light_state.dart';
 import '../../../core/models/paired_light.dart';
 
-@immutable
-class ControlState {
-  const ControlState(this.light, this.connection);
+part 'control_view_model.freezed.dart';
+part 'control_view_model.g.dart';
 
-  final LightState light;
-  final LightConnection connection;
+@freezed
+abstract class ControlState with _$ControlState {
+  const ControlState._();
+
+  const factory ControlState(LightState light, LightConnection connection) = _ControlState;
 
   String get name => switch (connection.light) {
     ConnectedLight(:final name) => name,
@@ -22,16 +24,11 @@ class ControlState {
   /// Channel lights cannot report a link status, so none is shown for them.
   bool get showsLinkStatus => connection.light is ConnectedLight;
   LinkStatus get status => connection.status;
-
-  @override
-  bool operator ==(Object other) => other is ControlState && other.light == light && other.connection == connection;
-
-  @override
-  int get hashCode => Object.hash(light, connection);
 }
 
 /// Everything the control screen can do to the light.
-class ControlViewModel extends Notifier<ControlState> {
+@Riverpod(keepAlive: true)
+class ControlViewModel extends _$ControlViewModel {
   late LightRepository _lights;
 
   @override
@@ -71,5 +68,3 @@ class ControlViewModel extends Notifier<ControlState> {
   /// Unpairs and returns to the search screen.
   Future<void> findLightAgain() => _lights.forget();
 }
-
-final controlViewModelProvider = NotifierProvider<ControlViewModel, ControlState>(ControlViewModel.new);

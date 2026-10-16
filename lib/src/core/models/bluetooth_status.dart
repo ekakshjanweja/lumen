@@ -1,33 +1,19 @@
-import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'bluetooth_status.freezed.dart';
 
 enum AdapterStatus { unknown, unavailable, unauthorized, off, on }
 
 /// Whether the phone can talk to lights right now.
-@immutable
-class BluetoothStatus {
-  const BluetoothStatus({this.adapter = AdapterStatus.unknown, this.broadcastDenied = false, this.canTurnOn = false});
+@freezed
+abstract class BluetoothStatus with _$BluetoothStatus {
+  const factory BluetoothStatus({
+    @Default(AdapterStatus.unknown) AdapterStatus adapter,
 
-  final AdapterStatus adapter;
+    /// The user declined the permission needed to broadcast to channel lights.
+    @Default(false) bool broadcastDenied,
 
-  /// The user declined the permission needed to broadcast to channel lights.
-  final bool broadcastDenied;
-
-  /// Whether the app can switch Bluetooth on itself (Android only).
-  final bool canTurnOn;
-
-  BluetoothStatus copyWith({AdapterStatus? adapter, bool? broadcastDenied}) => BluetoothStatus(
-    adapter: adapter ?? this.adapter,
-    broadcastDenied: broadcastDenied ?? this.broadcastDenied,
-    canTurnOn: canTurnOn,
-  );
-
-  @override
-  bool operator ==(Object other) =>
-      other is BluetoothStatus &&
-      other.adapter == adapter &&
-      other.broadcastDenied == broadcastDenied &&
-      other.canTurnOn == canTurnOn;
-
-  @override
-  int get hashCode => Object.hash(adapter, broadcastDenied, canTurnOn);
+    /// Whether the app can switch Bluetooth on itself (Android only).
+    @Default(false) bool canTurnOn,
+  }) = _BluetoothStatus;
 }

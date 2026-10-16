@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers.dart';
 import '../../../repositories/bluetooth_repository.dart';
@@ -10,47 +10,27 @@ import '../../../core/models/light_connection.dart';
 import '../../../core/models/light_state.dart';
 import '../../../core/models/paired_light.dart';
 
+part 'search_view_model.freezed.dart';
+part 'search_view_model.g.dart';
+
 enum SearchStep { intro, blinking, sweeping, confirming, notFound }
 
-@immutable
-class SearchState {
-  const SearchState({
-    this.step = SearchStep.intro,
-    this.progress = 0,
-    this.candidate = 0,
-    this.candidateCount = 0,
-    this.nearby = const [],
-    this.connectingId,
-  });
+@freezed
+abstract class SearchState with _$SearchState {
+  const factory SearchState({
+    @Default(SearchStep.intro) SearchStep step,
 
-  final SearchStep step;
+    /// 0-1 through the channel sweep.
+    @Default(0) double progress,
 
-  /// 0-1 through the channel sweep.
-  final double progress;
+    /// Which of [candidateCount] possible matches is being flashed.
+    @Default(0) int candidate,
+    @Default(0) int candidateCount,
 
-  /// Which of [candidateCount] possible matches is being flashed.
-  final int candidate;
-  final int candidateCount;
-
-  /// Lights that do show up in a Bluetooth scan.
-  final List<FoundLight> nearby;
-  final String? connectingId;
-
-  SearchState copyWith({
-    SearchStep? step,
-    double? progress,
-    int? candidate,
-    int? candidateCount,
-    List<FoundLight>? nearby,
-    String? Function()? connectingId,
-  }) => SearchState(
-    step: step ?? this.step,
-    progress: progress ?? this.progress,
-    candidate: candidate ?? this.candidate,
-    candidateCount: candidateCount ?? this.candidateCount,
-    nearby: nearby ?? this.nearby,
-    connectingId: connectingId != null ? connectingId() : this.connectingId,
-  );
+    /// Lights that do show up in a Bluetooth scan.
+    @Default([]) List<FoundLight> nearby,
+    String? connectingId,
+  }) = _SearchState;
 }
 
 /// Finds the light by making it react, since channel lights never show up
@@ -58,7 +38,8 @@ class SearchState {
 /// 1. blink the factory-default channel and ask the user to confirm;
 /// 2. otherwise sweep every channel and group, turning the light red;
 /// 3. narrow down by flashing the last few candidates one at a time.
-class SearchViewModel extends Notifier<SearchState> {
+@riverpod
+class SearchViewModel extends _$SearchViewModel {
   static const blinkInterval = Duration(milliseconds: 600);
   static const sweepInterval = Duration(milliseconds: 400);
   static const flashInterval = Duration(milliseconds: 500);
@@ -80,7 +61,7 @@ class SearchViewModel extends Notifier<SearchState> {
       for (final c in channels) ...[ChannelLight(c, allGroups), ChannelLight(c, 0)],
       for (final c in channels)
         for (var g = 1; g < groupCount; g++) ChannelLight(c, g),
-    ]..remove(ChannelLight.factoryDefault);
+    ]..remove(PairedLight.factoryDefault);
   }();
 
   late LightRepository _lights;
@@ -111,10 +92,10 @@ class SearchViewModel extends Notifier<SearchState> {
     if (!await _bluetooth.ensureBroadcastPermission()) return;
     _tick = 0;
     state = state.copyWith(step: SearchStep.blinking);
-    _every(blinkInterval, () => _lights.probe(ChannelLight.factoryDefault, (_tick++).isEven ? _white : _off));
+    _every(blinkInterval, () => _lights.probe(PairedLight.factoryDefault, (_tick++).isEven ? _white : _off));
   }
 
-  Future<void> confirmBlinking() => _pair(ChannelLight.factoryDefault);
+  Future<void> confirmBlinking() => _pair(PairedLight.factoryDefault);
 
   void rejectBlinking() => _sweep();
 
@@ -140,9 +121,9 @@ class SearchViewModel extends Notifier<SearchState> {
 
   Future<void> connectNearby(FoundLight light) async {
     _timer?.cancel();
-    state = state.copyWith(connectingId: () => light.id);
+    state = state.copyWith(connectingId: light.id);
     _paired = await _lights.connect(light);
-    if (ref.mounted) state = state.copyWith(connectingId: () => null);
+    if (ref.mounted) state = state.copyWith(connectingId: null);
   }
 
   void _sweep() {
@@ -180,5 +161,3 @@ class SearchViewModel extends Notifier<SearchState> {
     });
   }
 }
-
-final searchViewModelProvider = NotifierProvider.autoDispose<SearchViewModel, SearchState>(SearchViewModel.new);

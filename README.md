@@ -31,6 +31,11 @@ lib/
         widgets/          views: read state, call view-model methods
 ```
 
+Models and view-model states are [freezed](https://pub.dev/packages/freezed) classes;
+providers and view models use [riverpod_generator](https://pub.dev/packages/riverpod_generator).
+The generated `*.freezed.dart` / `*.g.dart` files are committed, so the app builds
+without running the generator first.
+
 Dependencies only point downwards: views -> view models -> repositories -> services.
 Views never touch repositories, and view models never touch Bluetooth APIs.
 
@@ -45,6 +50,7 @@ Views never touch repositories, and view models never touch Bluetooth APIs.
 ## Commands
 
 ```sh
+dart run build_runner watch -d     # regenerate freezed / riverpod code while editing
 flutter test                       # codecs + view models (fake repositories in test/testing; tests mirror lib/src)
 flutter build apk --release
 flutter build ios --release        # needs a signing team set in Xcode

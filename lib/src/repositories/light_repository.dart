@@ -30,7 +30,7 @@ class LightRepository {
 
   final _connectionChanges = StreamController<LightConnection>.broadcast();
   final _stateChanges = StreamController<LightState>.broadcast();
-  LightConnection _connection = const LightConnection.none();
+  LightConnection _connection = LightConnection.none;
   LightState _state = const LightState();
 
   GattLink? _link;
@@ -90,7 +90,7 @@ class LightRepository {
     await _beacon.stop();
     _setConnection(LightConnection(light, LinkStatus.connecting));
     if (!await _open(light)) {
-      _setConnection(const LightConnection.none());
+      _setConnection(LightConnection.none);
       return false;
     }
     await _prefs.saveLight(light);
@@ -100,7 +100,7 @@ class LightRepository {
   Future<void> forget() async {
     await _closeLink();
     await _beacon.stop();
-    _setConnection(const LightConnection.none());
+    _setConnection(LightConnection.none);
     await _prefs.saveLight(null);
   }
 

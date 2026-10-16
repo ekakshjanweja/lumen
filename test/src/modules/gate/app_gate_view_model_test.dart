@@ -25,7 +25,7 @@ void main() {
   test('a paired light goes straight to controls and gets permission requested', () async {
     final bt = FakeBluetoothRepository()..grantPermission = false;
     final lights = FakeLightRepository()
-      ..connection = const LightConnection(ChannelLight.factoryDefault, LinkStatus.connected);
+      ..connection = const LightConnection(PairedLight.factoryDefault, LinkStatus.connected);
     final c = makeContainer(bluetooth: bt, lights: lights);
     c.listen(appGateViewModelProvider, (_, _) {});
 
@@ -40,7 +40,7 @@ void main() {
     final c = makeContainer(lights: lights);
     c.listen(appGateViewModelProvider, (_, _) {});
 
-    await lights.pairChannel(ChannelLight.factoryDefault);
+    await lights.pairChannel(PairedLight.factoryDefault);
     await Future<void>.delayed(Duration.zero);
 
     expect(c.read(appGateViewModelProvider).screen, AppScreen.control);

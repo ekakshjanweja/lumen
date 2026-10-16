@@ -27,9 +27,9 @@ void main() {
 
   test('all groups only touches the group bits', () {
     // Regression: 255 here turned white and effect commands into garbage on hardware.
-    final white = BeaconCodec.encode(ChannelLight.factoryDefault, const LightState(kelvin: 5600, brightness: 80));
+    final white = BeaconCodec.encode(PairedLight.factoryDefault, const LightState(kelvin: 5600, brightness: 80));
     expect(white.sublist(18), [0x00, 0x07, 0x70, 0x00, 80]);
-    final fx = BeaconCodec.encode(ChannelLight.factoryDefault, const LightState(mode: LightMode.effect, effect: 10));
+    final fx = BeaconCodec.encode(PairedLight.factoryDefault, const LightState(mode: LightMode.effect, effect: 10));
     expect(fx[19] >> 3, 10);
   });
 }
