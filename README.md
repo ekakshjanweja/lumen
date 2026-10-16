@@ -1,140 +1,126 @@
-# Lumen
+# lumen
 
-A fast, good-looking remote for Bluetooth LED video lights that normally use the **LEDLYD**
-app. Find your light in a few taps, then set white, colour, brightness and effects from a
-single screen. Runs on Android and iOS, works offline and has no accounts.
+a better remote for the bluetooth led lights that normally use the **ledlyd** app.
+
+find your light in a few taps, then set white, color, brightness and effects from one screen. works on android and ios. no accounts, no internet.
 
 <p align="center">
-  <img src="docs/screenshots/search.jpg" width="19%" alt="Finding the light" />
-  <img src="docs/screenshots/white.jpg" width="19%" alt="White light" />
-  <img src="docs/screenshots/color.jpg" width="19%" alt="Colour picker" />
-  <img src="docs/screenshots/effects.jpg" width="19%" alt="Effects" />
-  <img src="docs/screenshots/presets.jpg" width="19%" alt="Colour presets" />
+  <img src="docs/screenshots/search.jpg" width="19%" alt="finding the light" />
+  <img src="docs/screenshots/white.jpg" width="19%" alt="white light" />
+  <img src="docs/screenshots/color.jpg" width="19%" alt="color picker" />
+  <img src="docs/screenshots/effects.jpg" width="19%" alt="effects" />
+  <img src="docs/screenshots/presets.jpg" width="19%" alt="color presets" />
 </p>
 
-> Lumen is an independent project. It is not made by, or affiliated with, the makers of the
-> LEDLYD app or the lights.
+> not affiliated with ledlyd or whoever makes the lights. this is an independent project.
 
-## What it does
+## why
 
-- **Finds your light without any setup codes.** Lumen makes the light blink and asks if you
-  saw it. If the light was moved off its factory channel, Lumen checks every channel and
-  group until you tell it the light turned red.
-- **White:** colour temperature from 2500 K to 9900 K, with Tungsten, Neutral, Daylight and
-  Cloudy presets.
-- **Colour:** a colour pad for hue and saturation, a row of quick presets, and a presets
-  sheet with 12 built-in colours. Save your own colours by name and delete them again.
-- **Effects:** all 24 effects built into the light:
-  - **Ambient:** TV, Candle, Flame 1–2, Romantic
-  - **Emergency:** Police, Ambulance, Fire truck
-  - **Flash & strobe:** Flash 1–2, Strobe 1–3
-  - **Party:** Chase 1–3, Fireworks 1–3, Club 1–2, Music, Wave 1–2
-- **Brightness and power:** a large brightness slider. Tap the light on screen to switch the
-  real one on or off.
-- **Live preview:** the on-screen light glows in the colour you picked and plays a soft
-  preview of the selected effect.
-- **Remembers everything:** your light, its last setting and your saved colours are kept on
-  the phone, and the light is set back the way you left it when you open the app.
+i have one of these lights and wanted a much better ui and pairing that just works. so i reverse engineered the ledlyd app's bluetooth protocol and built this.
 
-## Compatible lights
+the interesting part was pairing. my light never showed up in a bluetooth scan, no matter what. turns out it doesn't advertise at all. it only listens for broadcast adverts on its channel (100 by default) and does whatever they say. so lumen doesn't really "connect" to it, it just broadcasts.
 
-Lumen speaks the same Bluetooth protocol as the LEDLYD app (Android package
-`uni.UNI6FB700B`). **If your light works with LEDLYD, it should work with Lumen.** Those
-lights come in two kinds, and Lumen handles both:
+one bug worth mentioning: the stock app's code addresses "all groups" as 255 in one place. send that and white and most effects break, because it bleeds into the effect bits. the value that actually works is 7.
 
-| Kind | How to recognise it | How Lumen controls it | Status |
+## what it does
+
+- **finds your light without setup codes.** lumen makes the light blink and asks if you saw it. if the light was moved off its default channel, it checks every channel and group until you say it turned red.
+- **white**: 2500 K to 9900 K, plus tungsten, neutral, daylight and cloudy presets.
+- **color**: a color pad for hue and saturation, a quick presets row, and a presets sheet with 12 built-in colors. you can save your own colors by name and delete them.
+- **effects**: all 24 effects the light has:
+  - ambient: tv, candle, flame 1-2, romantic
+  - emergency: police, ambulance, fire truck
+  - flash & strobe: flash 1-2, strobe 1-3
+  - party: chase 1-3, fireworks 1-3, club 1-2, music, wave 1-2
+- **brightness and power**: big brightness slider. tap the light on screen to turn the real one on or off.
+- **live preview**: the on-screen light glows in your color and plays a soft preview of the selected effect.
+- **remembers stuff**: your light, its last setting and your saved colors stay on the phone. open the app and the light goes back to how you left it.
+
+## which lights work
+
+lumen uses the same bluetooth protocol as the ledlyd app (android package `uni.UNI6FB700B`). basically, if your light works with ledlyd, it should work with lumen.
+
+those lights come in two kinds. lumen handles both:
+
+| kind | how to tell | how lumen controls it | status |
 |---|---|---|---|
-| **Broadcast lights** | Never show up in a Bluetooth scan, and there is nothing to "connect" to. Small handheld/pocket RGB lights with a screen and **M / + / − / ▶** buttons. | Broadcasts the light's settings on its channel (1–100) and group (A–F or all). Factory default is channel 100, all groups. | ✅ Tested on hardware: white, colour, brightness, power and all effects. |
-| **Connected lights** | Show up in a Bluetooth scan as `LTF_MWRGB`, `LYD_MWRGB`, `Bough_Systems` or `LYDBough_Systems`. | Connects to the light and sends commands directly. The light reports its settings back. | ⚠️ Built from the protocol but not yet tested on a real light. |
+| **broadcast lights** | never show up in a bluetooth scan. small handheld rgb lights with a screen and **M / + / − / ▶** buttons. | broadcasts settings on the light's channel (1-100) and group (a-f or all). default is channel 100, all groups. | tested on a real light. white, color, brightness, power and all effects work. |
+| **connected lights** | show up in a scan as `LTF_MWRGB`, `LYD_MWRGB`, `Bough_Systems` or `LYDBough_Systems`. | connects and sends commands directly. the light reports its settings back. | built from the protocol, not tested on a real light yet. |
 
-Not compatible: lights that use a different app, such as Philips Hue, Govee, Nanoleaf,
-Aputure Sidus or Godox.
+won't work with lights that use a different app, like philips hue, govee, nanoleaf, aputure sidus or godox.
 
-## Getting started
+## getting started
 
-1. Switch the light on and keep it close to your phone.
-2. Open Lumen and allow Bluetooth access ("Nearby devices" on Android).
-3. Tap **Search**. Lumen makes your light blink.
-   - **Blinking?** Tap **Yes**. You're done.
-   - **Not blinking?** Tap **No**. Lumen checks every channel and group, which can take a
-     few minutes. Watch the light and tap **It turned red** as soon as it does. Lumen then
-     flashes the last few candidates red and blue until you confirm the right one.
-4. Connected lights show up under **Found nearby** on the search screen. Tap one to connect.
+1. turn the light on and keep it close to your phone.
+2. open lumen and allow bluetooth ("nearby devices" on android).
+3. tap **search**. lumen makes your light blink.
+   - blinking? tap **yes**. done.
+   - not blinking? tap **no**. lumen checks every channel and group, which can take a few minutes. tap **it turned red** as soon as your light turns red. then it flashes the last few candidates red and blue until you confirm the right one.
+4. connected lights show up under **found nearby** on the search screen. tap one to connect.
 
-To set up a different light later, tap the radar button in the top right.
+to set up a different light later, tap the radar button in the top right.
 
-## Good to know
+## good to know
 
-- **Broadcast lights can't send anything back.** Battery level and the light's current
-  setting can't be shown. Lumen shows what it last sent.
-- **Lumen only controls the light while it's open.** It stops broadcasting when it goes to
-  the background, and iOS doesn't allow background broadcasting anyway.
-- **One phone at a time.** If two phones broadcast different settings on the same channel,
-  the light flips between them. Close the app (Lumen or LEDLYD) on the other phone.
-- **One light at a time.** Lumen controls the light it was set up with. Lights that share a
-  channel and group all follow it together.
-- **Reduce motion is respected.** Looping animations stop when the system setting is on, and
-  effect previews never flash more than 3 times a second.
+- **broadcast lights can't send anything back.** so no battery level, and no reading the light's current setting. lumen just shows what it last sent.
+- **lumen only controls the light while it's open.** it stops broadcasting in the background, and ios doesn't allow background broadcasting anyway.
+- **one phone at a time.** if two phones broadcast different settings on the same channel, the light keeps flipping between them. close lumen or ledlyd on the other phone.
+- **one light at a time.** lumen controls the light you set it up with. lights sharing a channel and group all follow it together.
+- **reduce motion works.** looping animations stop when it's on, and effect previews never flash more than 3 times a second.
 
-## Privacy
+## privacy
 
-Lumen has no accounts, analytics or ads, and makes no network requests. The Android release
-build doesn't even request internet access. Everything it remembers stays on your phone.
+no accounts, no analytics, no ads, no network requests. the android release build doesn't even ask for internet access. everything stays on your phone.
 
-## Requirements
+## requirements
 
-- **Android 7.0 or newer**, on a phone whose Bluetooth supports advertising (almost all do).
-- **iOS 15 or newer.**
+- android 7.0 or newer, with bluetooth that supports advertising (almost every phone does)
+- ios 15 or newer
 
-## Building
+## building
 
-Requires Flutter 3.47 or newer (Dart 3.13).
+needs flutter 3.47+ (dart 3.13).
 
 ```sh
 flutter pub get
-flutter run                          # on a connected phone; Bluetooth doesn't work in simulators
+flutter run                          # on a real phone, bluetooth doesn't work in simulators
 flutter build apk --release
-flutter build ios --release          # set your signing team in Xcode first
+flutter build ios --release          # set your signing team in xcode first
 ```
 
-Generated code (`*.freezed.dart`, `*.g.dart`) is committed. After changing a model, provider
-or view model, regenerate it:
+generated code (`*.freezed.dart`, `*.g.dart`) is committed. if you change a model, provider or view model, regenerate it:
 
 ```sh
 dart run build_runner watch -d
 ```
 
-Tests cover the wire codecs, preset storage and every view model, using fake repositories
-from `test/testing/`:
+tests cover the wire codecs, preset storage and every view model, using fake repositories from `test/testing/`:
 
 ```sh
 flutter test
 ```
 
-## How it talks to the light
+## how it talks to the light
 
-- **Broadcast lights** listen for a 23-byte, iBeacon-shaped advert:
-  `02 15`, then the UUID `FAA50000-1111-ABCD-0123-BE89`, then the channel as a 32-bit number,
-  then major, minor and power.
-  - **Major** packs the group (bits 0–2, where 7 means all groups), the effect and the
-    saturation.
-  - **Minor** carries the hue, or the colour temperature.
-  - **Power** is the brightness, where 0 means off.
+**broadcast lights** listen for a 23-byte iBeacon-shaped advert:
 
-  Android sends the advert as manufacturer data (company `0xFFFF`, `MainActivity.kt`). iOS
-  sends it as a real iBeacon (`AppDelegate.swift`), because iOS doesn't allow custom
-  manufacturer data.
-- **Connected lights** use GATT service `FFF0`. Lumen writes 10-byte frames to `FFF3`
-  (mode, effect, brightness, temperature, hue, saturation and effect parameters) and reads
-  the same layout back from `FFF4`.
+```
+02 15 | uuid FAA50000-1111-ABCD-0123-BE89 + channel (u32) | major | minor | power
+```
 
-The encoders are in `lib/src/services/protocol/`.
+- major packs the group (bits 0-2, 7 = all groups), the effect and the saturation
+- minor is the hue, or the color temperature
+- power is the brightness, 0 means off
 
-## Project structure
+android sends it as manufacturer data with company id `0xFFFF` (`MainActivity.kt`). ios doesn't let apps send custom manufacturer data, so it goes out as a real iBeacon instead (`AppDelegate.swift`). the light follows both.
 
-The code follows the [Flutter app architecture guide](https://docs.flutter.dev/app-architecture/guide):
-MVVM in the UI layer, with services and repositories in the data layer. Riverpod handles
-dependency injection and view-model state.
+**connected lights** use gatt service `FFF0`. lumen writes 10-byte frames to `FFF3` (mode, effect, brightness, temperature, hue, saturation, effect params) and reads the same layout back from `FFF4`.
+
+the encoders are in `lib/src/services/protocol/`.
+
+## project structure
+
+follows the [flutter app architecture guide](https://docs.flutter.dev/app-architecture/guide). mvvm in the ui layer, services and repositories in the data layer, riverpod for di and view model state.
 
 ```
 lib/
@@ -144,33 +130,32 @@ lib/
     core/
       providers.dart      dependency graph (services -> repositories)
       models/             pure models: LightState, PairedLight, Effect, ColorPreset, ...
-      theme/              theme, motion, light colours, effect previews
-      widgets/            shared widgets: light orb, colour pad, sliders, ...
-    services/             platform wrappers: BLE (flutter_blue_plus), the native
-                          broadcaster (method channel), SharedPreferences, Hive
-      protocol/           wire codecs (GATT frame, broadcast beacon)
+      theme/              theme, motion, light colors, effect previews
+      widgets/            shared widgets: light orb, color pad, sliders, ...
+    services/             platform wrappers: ble (flutter_blue_plus), the native
+                          broadcaster (method channel), SharedPreferences, hive
+      protocol/           wire codecs (gatt frame, broadcast beacon)
     repositories/         sources of truth: BluetoothRepository, LightRepository,
                           PresetRepository
     modules/
       gate/               picks the top-level screen
       search/             finds the light by making it blink
-      control/            white, colour, effects and presets
-        view_models/      Riverpod notifiers: immutable state + intent methods
-        widgets/          views: read state, call view-model methods
+      control/            white, color, effects and presets
+        view_models/      riverpod notifiers: immutable state + intent methods
+        widgets/          views: read state, call view model methods
 ```
 
-Dependencies only point downwards: views -> view models -> repositories -> services. Views
-never touch repositories, and view models never touch Bluetooth APIs.
+dependencies only point down: views -> view models -> repositories -> services. views never touch repositories, view models never touch bluetooth apis.
 
-**Built with:**
+built with:
+
 - [freezed](https://pub.dev/packages/freezed) for immutable models and screen states
 - [riverpod_generator](https://pub.dev/packages/riverpod_generator) for providers and view models
-- [hive_ce](https://pub.dev/packages/hive_ce) for saved colours
+- [hive_ce](https://pub.dev/packages/hive_ce) for saved colors
 - [flutter_animate](https://pub.dev/packages/flutter_animate) for entrance animations
 - [flutter_blue_plus](https://pub.dev/packages/flutter_blue_plus) for scanning and connecting
 
-## Third-party licences
+## licenses
 
-- **flutter_blue_plus** is free for non-commercial use only. Shipping Lumen commercially
-  needs a commercial licence from its authors, or a different BLE library.
-- **Manrope** font: SIL Open Font License (`assets/fonts/Manrope-OFL.txt`).
+- **flutter_blue_plus** is free for non-commercial use only. shipping lumen commercially needs a commercial license from its authors, or a different ble library.
+- **manrope** font is under the sil open font license (`assets/fonts/Manrope-OFL.txt`).
